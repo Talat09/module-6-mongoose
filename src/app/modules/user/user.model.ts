@@ -1,8 +1,10 @@
-import { Schema, model } from "mongoose";
-import { IUser } from "./user.interface";
+import { Model, Schema, model } from "mongoose";
+import { IUser, IUserMethods, UserModel } from "./user.interface";
 
+// Create a new Model type that knows about IUserMethods...
+// type UserModel = Model<IUser, {}, IUserMethods>;
 //step2: create a schema corresponding to the document interface
-export const userSchema = new Schema<IUser>({
+export const userSchema = new Schema<IUser, UserModel, IUserMethods>({
   id: {
     type: String,
     required: true,
@@ -43,6 +45,18 @@ export const userSchema = new Schema<IUser>({
     required: true,
   },
 });
+//static class ---> this .
+userSchema.static("getAdminUsers", async function getAdminUsers() {
+  const admins = await this.find({ role: "admin" });
+  return admins;
+});
+//
+userSchema.method("fullName", function fullName() {
+  return this.name.firstName + " " + this.name.lastName;
+});
+
 //crate a Model
-const User = model<IUser>("User", userSchema);
+const User = model<IUser, UserModel>("User", userSchema);
 export default User;
+// instance methods ----> instance er methods
+//class --> instance + methods ---> instance methods
